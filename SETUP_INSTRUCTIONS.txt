@@ -1,0 +1,279 @@
+=================================================
+MOSLIMANI PLATFORM - SETUP INSTRUCTIONS
+=================================================
+
+This is a Laravel 12 e-commerce platform with:
+- Filament Admin Panel
+- JWT Authentication for React frontend
+- PostgreSQL database
+- DomPDF for invoice generation
+- Local filesystem for image uploads
+
+=================================================
+LOCAL DEVELOPMENT SETUP
+=================================================
+
+1. Prerequisites:
+   - PHP 8.2+
+   - Composer
+   - PostgreSQL 14+
+   - Node.js (optional, for frontend)
+
+2. Create PostgreSQL database:
+   
+   createdb moslimani
+   
+   Or using psql:
+   CREATE DATABASE moslimani;
+   CREATE USER moslimani_user WITH PASSWORD 'secret';
+   GRANT ALL PRIVILEGES ON DATABASE moslimani TO moslimani_user;
+
+3. Copy environment file:
+   
+   cp env.example.txt .env
+
+4. Install dependencies:
+   
+   composer install
+
+5. Generate keys:
+   
+   php artisan key:generate
+   php artisan jwt:secret
+
+6. Create storage link:
+   
+   php artisan storage:link
+
+7. Run migrations:
+   
+   php artisan migrate
+
+8. Seed database:
+   
+   php artisan db:seed
+
+9. Start server:
+   
+   php artisan serve
+
+10. Access admin panel:
+    
+    URL: http://localhost:8000/admin
+    Email: admin@moslimani.com
+    Password: password
+
+=================================================
+API ENDPOINTS
+=================================================
+
+Authentication:
+- POST /api/v1/auth/login - Get JWT token
+- POST /api/v1/auth/logout - Invalidate token (protected)
+- POST /api/v1/auth/refresh - Refresh token (protected)
+- GET /api/v1/auth/me - Get current user (protected)
+
+Products (Public):
+- GET /api/v1/products - List products
+- GET /api/v1/products/{id} - Get product details
+
+Coming Products (Public):
+- GET /api/v1/coming-products - List coming products
+- GET /api/v1/coming-products/{id} - Get details
+
+Orders:
+- POST /api/v1/orders - Create order (public)
+- GET /api/v1/orders/{id} - Get order details
+- GET /api/v1/orders/invoice/{invoiceNumber} - Download PDF
+
+Admin Endpoints (Protected - requires JWT):
+- GET /api/v1/admin/orders - List orders
+- PATCH /api/v1/admin/orders/{id}/status - Update status
+- GET /api/v1/admin/orders/{id}/invoice - Download PDF
+- GET /api/v1/admin/customers - List customers
+- GET /api/v1/admin/customers/{id} - Get customer details
+
+=================================================
+REACT FRONTEND INTEGRATION
+=================================================
+
+1. Login to get JWT token:
+
+   POST /api/v1/auth/login
+   Body: { "email": "admin@moslimani.com", "password": "password" }
+   
+   Response: { "access_token": "...", "token_type": "bearer", "expires_in": 3600 }
+
+2. Use token in requests:
+
+   Authorization: Bearer <access_token>
+
+3. Create order:
+
+   POST /api/v1/orders
+   Body: {
+     "customer": {
+       "name": "Ahmad",
+       "phone": "+201234567890",
+       "address": {
+         "city": "Cairo",
+         "street": "El Nasr",
+         "building": "2A"
+       }
+     },
+     "items": [
+       { "product_id": 1, "quantity": 2 }
+     ],
+     "notes": "Leave at reception"
+   }
+
+=================================================
+DEPLOYMENT TO RENDER
+=================================================
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Use render.yaml or configure manually:
+   - Build Command: composer install --no-dev --optimize-autoloader
+   - Start Command: php artisan serve --host=0.0.0.0 --port=$PORT
+4. Add environment variables:
+   - APP_KEY (generate with: php artisan key:generate --show)
+   - JWT_SECRET (generate locally)
+   - DATABASE_URL (from Render PostgreSQL)
+   - APP_URL
+   - FRONTEND_URL
+
+5. Create PostgreSQL database on Render and link it
+
+=================================================
+DEPLOYMENT TO RAILWAY
+=================================================
+
+1. Create a new project on Railway
+2. Add a PostgreSQL service
+3. Add a PHP service and connect your repo
+4. Railway will auto-detect using nixpacks.toml
+5. Set environment variables:
+   - APP_KEY
+   - JWT_SECRET
+   - DB_CONNECTION=pgsql
+   - DATABASE_URL (auto-set by Railway)
+   - APP_URL
+   - FRONTEND_URL
+
+=================================================
+IMPORTANT NOTES
+=================================================
+
+1. File Storage:
+   - Local storage is used (public disk)
+   - For production, consider switching to S3/R2
+   - Uploaded files are stored in storage/app/public
+
+2. Database:
+   - PostgreSQL is required
+   - Migrations use decimal for money fields
+   - Customer matching is done by phone number
+
+3. Invoice PDF:
+   - Uses DomPDF with DejaVu Sans font
+   - RTL Arabic support included
+   - Template: resources/views/invoices/order.blade.php
+
+4. Security:
+   - Admin panel protected by Filament auth
+   - API admin routes require JWT
+   - CORS configured for frontend URL
+
+5. Customer Logic:
+   - Customer matched by phone number
+   - Existing customer address updated on new order
+   - num_purchases incremented when order completed
+
+=================================================
+FILE STRUCTURE
+=================================================
+
+app/
+├── Filament/
+│   ├── Pages/
+│   │   └── Dashboard.php
+│   └── Resources/
+│       ├── ComingProductResource.php
+│       ├── CustomerResource.php
+│       ├── OrderResource.php
+│       └── ProductResource.php
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   │       ├── Admin/
+│   │       │   ├── CustomerController.php
+│   │       │   └── OrderController.php
+│   │       ├── AuthController.php
+│   │       ├── ComingProductController.php
+│   │       ├── InvoiceController.php
+│   │       ├── OrderController.php
+│   │       └── ProductController.php
+│   ├── Middleware/
+│   │   ├── CorsMiddleware.php
+│   │   └── JwtMiddleware.php
+│   └── Requests/
+│       ├── StoreOrderRequest.php
+│       ├── StoreProductRequest.php
+│       └── UpdateProductRequest.php
+├── Models/
+│   ├── ComingProduct.php
+│   ├── Customer.php
+│   ├── Order.php
+│   ├── OrderItem.php
+│   ├── Product.php
+│   └── User.php
+├── Providers/
+│   ├── AppServiceProvider.php
+│   └── FilamentServiceProvider.php
+└── Services/
+    └── OrderService.php
+
+database/
+├── factories/
+│   └── UserFactory.php
+├── migrations/
+│   ├── 0001_01_01_000000_create_users_table.php
+│   ├── 0001_01_01_000001_create_cache_table.php
+│   ├── 0001_01_01_000002_create_jobs_table.php
+│   ├── 2024_01_01_100000_create_customers_table.php
+│   ├── 2024_01_01_100001_create_products_table.php
+│   ├── 2024_01_01_100002_create_coming_products_table.php
+│   ├── 2024_01_01_100003_create_orders_table.php
+│   └── 2024_01_01_100004_create_order_items_table.php
+└── seeders/
+    ├── AdminUserSeeder.php
+    ├── DatabaseSeeder.php
+    └── ProductSeeder.php
+
+resources/views/
+├── filament/pages/
+│   └── dashboard.blade.php
+└── invoices/
+    └── order.blade.php
+
+routes/
+├── api.php
+├── console.php
+└── web.php
+
+tests/
+├── Feature/
+│   └── OrderTest.php
+└── Unit/
+    └── OrderServiceTest.php
+
+=================================================
+SUPPORT
+=================================================
+
+For issues or questions, check the api-contract.json file
+for detailed API documentation in OpenAPI format.
+
+
+

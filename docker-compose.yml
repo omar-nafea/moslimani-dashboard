@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - APP_NAME=Moslimani Platform
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_DATABASE=moslimani
+      - DB_USERNAME=moslimani_user
+      - DB_PASSWORD=secret
+      - FILESYSTEM_DISK=public
+    volumes:
+      - .:/var/www/html
+      - ./storage/app/public:/var/www/html/storage/app/public
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=moslimani
+      - POSTGRES_USER=moslimani_user
+      - POSTGRES_PASSWORD=secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
+
