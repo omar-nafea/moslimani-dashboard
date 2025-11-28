@@ -1,72 +1,39 @@
-# Dockerfile for Railway deployment
-FROM php:8.3-cli
+FROM php:8.4-fpm
 
-# Install system dependencies
+# System dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libpq-dev \
-    libicu-dev \
-    libonig-dev \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
-
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_pgsql \
-        pgsql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        zip \
-        intl \
-        opcache
+  git \
+  unzip \
+  zip \
+  libpq-dev \
+  libicu-dev \
+  libzip-dev \
+  libjpeg62-turbo-dev \
+  libpng-dev \
+  libfreetype6-dev \
+  libxml2-dev \
+  && docker-php-ext-configure intl \
+  && docker-php-ext-install intl \
+  && docker-php-ext-install zip \
+  && docker-php-ext-install pdo pdo_pgsql \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install gd \
+  && docker-php-ext-install bcmath mbstring exif pcntl
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /app
+WORKDIR /var/www/html
 
-# Copy composer files first
-COPY composer.json composer.lock ./
-
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
-
-# Copy application files
 COPY . .
 
-# Run post-install scripts
-RUN composer dump-autoload --optimize
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Create directories and set permissions
-RUN mkdir -p storage/framework/{cache/data,sessions,views} \
-    && mkdir -p storage/{logs,app/public,app/mpdf-temp,fonts} \
-    && mkdir -p bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
+# Set permissions
+RUN chmod -R 775 storage bootstrap/cache
 
-# Cache config (will be re-done at runtime with proper env vars)
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear
+EXPOSE 8000
 
-# Expose port
-EXPOSE ${PORT:-8000}
+CMD ["php-fpm"]
 
-# Start command
-CMD php artisan migrate --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php artisan storage:link 2>/dev/null || true && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
