@@ -43,6 +43,7 @@ class ComingProduct extends Model
 
   /**
    * Get the full URL for the product image.
+   * Uses /images/ route for CORS support with ngrok and cross-origin access.
    */
   public function getImageUrlAttribute(): ?string
   {
@@ -50,7 +51,8 @@ class ComingProduct extends Model
       return null;
     }
 
-    return Storage::disk('public')->url($this->image);
+    // Use the /images/ route which serves files with CORS headers
+    return url('/images/' . $this->image);
   }
 
   /**
