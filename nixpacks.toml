@@ -1,20 +1,49 @@
 # Nixpacks configuration for Railway deployment
+# https://nixpacks.com/docs/configuration/file
 
 [phases.setup]
-nixPkgs = ["php83", "php83Extensions.pdo", "php83Extensions.pdo_pgsql", "php83Extensions.gd", "php83Extensions.mbstring", "php83Extensions.xml", "php83Extensions.curl", "php83Extensions.zip"]
+nixPkgs = [
+  "php83",
+  "php83Extensions.pdo",
+  "php83Extensions.pdo_pgsql",
+  "php83Extensions.pgsql",
+  "php83Extensions.gd",
+  "php83Extensions.mbstring",
+  "php83Extensions.xml",
+  "php83Extensions.curl",
+  "php83Extensions.zip",
+  "php83Extensions.intl",
+  "php83Extensions.bcmath",
+  "php83Extensions.exif",
+  "php83Extensions.opcache"
+]
 
 [phases.install]
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
 [phases.build]
 cmds = [
-    "php artisan config:cache",
-    "php artisan route:cache",
-    "php artisan view:cache"
+  "mkdir -p storage/framework/cache/data",
+  "mkdir -p storage/framework/sessions",
+  "mkdir -p storage/framework/views",
+  "mkdir -p storage/logs",
+  "mkdir -p storage/app/public",
+  "mkdir -p storage/app/mpdf-temp",
+  "mkdir -p bootstrap/cache",
+  "chmod -R 775 storage bootstrap/cache",
+  "php artisan config:cache",
+  "php artisan route:cache",
+  "php artisan view:cache"
 ]
 
 [start]
 cmd = "php artisan migrate --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
 
-
-
+[variables]
+APP_ENV = "production"
+APP_DEBUG = "false"
+LOG_CHANNEL = "stderr"
+FILESYSTEM_DISK = "public"
+SESSION_DRIVER = "database"
+CACHE_STORE = "database"
+QUEUE_CONNECTION = "database"
