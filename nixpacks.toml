@@ -1,49 +1,25 @@
 # Nixpacks configuration for Railway deployment
-# https://nixpacks.com/docs/configuration/file
+# Using pre-built PHP with extensions
 
 [phases.setup]
-nixPkgs = [
-  "php83",
-  "php83Extensions.pdo",
-  "php83Extensions.pdo_pgsql",
-  "php83Extensions.pgsql",
-  "php83Extensions.gd",
-  "php83Extensions.mbstring",
-  "php83Extensions.xml",
-  "php83Extensions.curl",
-  "php83Extensions.zip",
-  "php83Extensions.intl",
-  "php83Extensions.bcmath",
-  "php83Extensions.exif",
-  "php83Extensions.opcache"
-]
+nixPkgs = ["php83", "php83Packages.composer"]
+aptPkgs = ["libpq-dev", "libpng-dev", "libjpeg-dev", "libfreetype6-dev", "libzip-dev"]
 
 [phases.install]
-cmds = ["composer install --no-dev --optimize-autoloader"]
+cmds = [
+  "composer install --no-dev --optimize-autoloader --no-interaction"
+]
 
 [phases.build]
 cmds = [
-  "mkdir -p storage/framework/cache/data",
-  "mkdir -p storage/framework/sessions",
-  "mkdir -p storage/framework/views",
-  "mkdir -p storage/logs",
-  "mkdir -p storage/app/public",
-  "mkdir -p storage/app/mpdf-temp",
+  "mkdir -p storage/framework/{cache/data,sessions,views}",
+  "mkdir -p storage/{logs,app/public,app/mpdf-temp,fonts}",
   "mkdir -p bootstrap/cache",
-  "chmod -R 775 storage bootstrap/cache",
-  "php artisan config:cache",
-  "php artisan route:cache",
-  "php artisan view:cache"
+  "chmod -R 777 storage bootstrap/cache",
+  "php artisan config:cache || true",
+  "php artisan route:cache || true",
+  "php artisan view:cache || true"
 ]
 
 [start]
-cmd = "php artisan migrate --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
-
-[variables]
-APP_ENV = "production"
-APP_DEBUG = "false"
-LOG_CHANNEL = "stderr"
-FILESYSTEM_DISK = "public"
-SESSION_DRIVER = "database"
-CACHE_STORE = "database"
-QUEUE_CONNECTION = "database"
+cmd = "php artisan migrate --force && php artisan storage:link 2>/dev/null || true && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"

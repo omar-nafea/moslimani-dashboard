@@ -36,15 +36,17 @@
     32 => 'Filament\\Tables\\TablesServiceProvider',
     33 => 'Filament\\Widgets\\WidgetsServiceProvider',
     34 => 'Kirschbaum\\PowerJoins\\PowerJoinsServiceProvider',
-    35 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    36 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    37 => 'Livewire\\LivewireServiceProvider',
-    38 => 'Carbon\\Laravel\\ServiceProvider',
-    39 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    40 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
-    41 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
-    42 => 'App\\Providers\\AppServiceProvider',
-    43 => 'App\\Providers\\FilamentServiceProvider',
+    35 => 'Laravel\\Sail\\SailServiceProvider',
+    36 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    37 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    38 => 'Livewire\\LivewireServiceProvider',
+    39 => 'Carbon\\Laravel\\ServiceProvider',
+    40 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    41 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    42 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
+    43 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+    44 => 'App\\Providers\\AppServiceProvider',
+    45 => 'App\\Providers\\FilamentServiceProvider',
   ),
   'eager' => 
   array (
@@ -73,11 +75,12 @@
     22 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     23 => 'Livewire\\LivewireServiceProvider',
     24 => 'Carbon\\Laravel\\ServiceProvider',
-    25 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    26 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
-    27 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
-    28 => 'App\\Providers\\AppServiceProvider',
-    29 => 'App\\Providers\\FilamentServiceProvider',
+    25 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    26 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    27 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
+    28 => 'Tymon\\JWTAuth\\Providers\\LaravelServiceProvider',
+    29 => 'App\\Providers\\AppServiceProvider',
+    30 => 'App\\Providers\\FilamentServiceProvider',
   ),
   'deferred' => 
   array (
@@ -234,6 +237,8 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
+    'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
@@ -275,6 +280,9 @@
     array (
     ),
     'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Sail\\SailServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
